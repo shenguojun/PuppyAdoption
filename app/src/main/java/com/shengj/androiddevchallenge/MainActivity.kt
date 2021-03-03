@@ -18,107 +18,37 @@ package com.shengj.androiddevchallenge
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.material.*
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.colorResource
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import com.shengj.androiddevchallenge.data.dogs
+import androidx.navigation.NavType
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.navArgument
+import androidx.navigation.compose.rememberNavController
 import com.shengj.androiddevchallenge.ui.theme.MyTheme
-import dev.chrisbanes.accompanist.glide.GlideImage
 
 class MainActivity : AppCompatActivity() {
+
+    companion object {
+        const val SCREEN_DOG_LIST = "screen_dog_list"
+        const val SCREEN_DOG_DETAIL = "screen_dog_detail"
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             MyTheme {
-                MyApp()
-            }
-        }
-    }
-}
-
-@Composable
-fun MyApp() {
-    Scaffold(
-        modifier = Modifier.background(color = MaterialTheme.colors.background),
-        content = {
-            Column {
-                Text(
-                    text = stringResource(id = R.string.main_title),
-                    modifier = Modifier.padding(20.dp)
-                )
-                LazyColumn(
-                    contentPadding = PaddingValues(10.dp),
-                    verticalArrangement = Arrangement.spacedBy(20.dp)
-                ) {
-                    items(dogs) { dog ->
-                        Card(elevation = 2.dp, modifier = Modifier.clickable {
-
-                        }) {
-                            GlideImage(
-                                data = dog.imageUrl,
-                                contentDescription = "",
-                                modifier = Modifier.fillMaxSize(),
-                                loading = {
-                                    Box(modifier = Modifier.fillMaxSize()) {
-                                        CircularProgressIndicator()
-                                    }
-                                },
-                                error = {
-                                    Image(
-                                        painterResource(id = R.drawable.ic_launcher_background),
-                                        contentDescription = "",
-                                    )
-                                })
-                            Column(
-                                modifier = Modifier.fillMaxSize(),
-                                verticalArrangement = Arrangement.Bottom
-                            ) {
-                                Surface(
-                                    color = colorResource(id = R.color.color_mask),
-                                    modifier = Modifier.fillMaxWidth()
-                                ) {
-                                    Text(
-                                        text = dog.description,
-                                        color = Color.White,
-                                        fontSize = 16.sp,
-                                        modifier = Modifier.padding(8.dp)
-                                    )
-                                }
-                            }
-                        }
+                val navController = rememberNavController()
+                NavHost(navController = navController, startDestination = SCREEN_DOG_LIST) {
+                    composable(SCREEN_DOG_LIST) {
+                        ScreenDogList(navController)
+                    }
+                    composable(
+                        "$SCREEN_DOG_DETAIL/{index}",
+                        arguments = listOf(navArgument("index") { type = NavType.IntType })
+                    ) {
+                        ScreenDogDetail(navController, it.arguments?.getInt("index") ?: 0)
                     }
                 }
             }
         }
-    )
-}
-
-
-@Preview("Light Theme", widthDp = 360, heightDp = 640)
-@Composable
-fun LightPreview() {
-    MyTheme {
-        MyApp()
-    }
-}
-
-@Preview("Dark Theme", widthDp = 360, heightDp = 640)
-@Composable
-fun DarkPreview() {
-    MyTheme(darkTheme = true) {
-        MyApp()
     }
 }
